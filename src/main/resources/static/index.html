@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Clientes — TPD006</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #38bdf8;
+            --accent2: #818cf8;
+            --surface: #1e293b;
+            --surface2: #263348;
+            --border: rgba(56,189,248,0.15);
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --success: #34d399;
+            --danger: #f87171;
+            --warning: #fbbf24;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--primary);
+            font-family: 'Sora', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── FONDO ANIMADO ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(56,189,248,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 80%, rgba(129,140,248,0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── LOGIN ── */
+        #loginDiv {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+            animation: slideUp 0.5s ease both;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-logo {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 24px rgba(56,189,248,0.3);
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.3rem;
+        }
+
+        .login-sub {
+            color: var(--muted);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        /* ── INPUTS ── */
+        .form-control, .form-select {
+            background: var(--primary);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 0.65rem 1rem;
+            font-family: 'Sora', sans-serif;
+            font-size: 0.9rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: var(--primary);
+            border-color: var(--accent);
+            color: var(--text);
+            box-shadow: 0 0 0 3px rgba(56,189,248,0.15);
+        }
+
+        .form-control::placeholder { color: var(--muted); }
+
+        .input-group-text {
+            background: var(--primary);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--muted);
+            border-radius: 10px 0 0 10px;
+        }
+
+        .input-group .form-control { border-radius: 0 10px 10px 0; }
+
+        /* ── BOTONES ── */
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            color: var(--primary);
+            font-weight: 700;
+            border-radius: 10px;
+            padding: 0.65rem 1.5rem;
+            font-family: 'Sora', sans-serif;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .btn-accent:hover { opacity: 0.9; transform: translateY(-1px); color: var(--primary); }
+
+        .btn-outline-accent {
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-family: 'Sora', sans-serif;
+            background: transparent;
+            transition: all 0.2s;
+        }
+        .btn-outline-accent:hover { background: var(--accent); color: var(--primary); }
+
+        .btn-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            border: none;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+            transition: all 0.15s;
+        }
+        .btn-edit  { background: rgba(251,191,36,0.15); color: var(--warning); }
+        .btn-edit:hover  { background: var(--warning); color: #000; }
+        .btn-del   { background: rgba(248,113,113,0.15); color: var(--danger); }
+        .btn-del:hover   { background: var(--danger); color: #fff; }
+
+        /* ── NAVBAR ── */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0.85rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .topbar-brand {
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex; align-items: center; gap: 0.6rem;
+        }
+
+        .brand-dot {
+            width: 8px; height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .user-chip {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 0.35rem 0.9rem;
+            font-size: 0.8rem;
+            color: var(--muted);
+            display: flex; align-items: center; gap: 0.5rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .user-chip:hover { border-color: var(--accent); }
+
+        /* ── LAYOUT APP ── */
+        #app { display: none; position: relative; z-index: 1; }
+
+        .app-body {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* ── CARDS ── */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .panel-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+
+        .panel-body { padding: 1.25rem; }
+
+        /* ── FORM LABELS ── */
+        .form-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.4rem;
+        }
+
+        /* ── TABLA ── */
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 4px;
+        }
+
+        .data-table thead th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+        }
+
+        .data-table tbody tr {
+            background: var(--surface2);
+            transition: background 0.15s;
+        }
+
+        .data-table tbody tr:hover { background: rgba(56,189,248,0.06); }
+
+        .data-table tbody td {
+            padding: 0.75rem 1rem;
+            border: none;
+            font-size: 0.88rem;
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr td:first-child { border-radius: 10px 0 0 10px; }
+        .data-table tbody tr td:last-child  { border-radius: 0 10px 10px 0; }
+
+        .badge-id {
+            background: rgba(56,189,248,0.1);
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+        }
+
+        /* ── STATS ── */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex; align-items: center; gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .stat-num {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+
+        /* ── TOAST ── */
+        #toastZone {
+            position: fixed;
+            top: 1.2rem; right: 1.2rem;
+            z-index: 9999;
+            display: flex; flex-direction: column; gap: 0.5rem;
+        }
+
+        .toast-item {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            display: flex; align-items: center; gap: 0.7rem;
+            font-size: 0.88rem;
+            min-width: 260px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            animation: toastIn 0.3s ease both;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--muted);
+        }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 0.8rem; opacity: 0.3; display: block; }
+
+        /* ── MODO EDICIÓN ── */
+        .editing-banner {
+            background: rgba(251,191,36,0.1);
+            border: 1px solid rgba(251,191,36,0.3);
+            border-radius: 10px;
+            padding: 0.5rem 1rem;
+            font-size: 0.82rem;
+            color: var(--warning);
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN ══════════════════ -->
+<div id="loginDiv">
+    <div class="login-card">
+        <div class="login-logo">👤</div>
+        <div class="login-title">Bienvenido</div>
+        <div class="login-sub">Sistema de Gestión de Clientes · TPD006</div>
+
+        <div class="mb-3">
+            <label class="form-label">Usuario</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" id="user" class="form-control" placeholder="Ingresa tu usuario">
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Contraseña</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" id="pass" class="form-control" placeholder="••••••••"
+                       onkeydown="if(event.key==='Enter') login()">
+            </div>
+        </div>
+
+        <button class="btn btn-accent w-100" onclick="login()">
+            <i class="bi bi-arrow-right-circle me-2"></i>Ingresar
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════════ APP ══════════════════ -->
+<div id="app">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="topbar-brand">
+            <div class="brand-dot"></div>
+            TPD006 · Clientes
+        </div>
+        <div class="user-chip" onclick="cerrarSesion()">
+            <i class="bi bi-person-circle"></i>
+            <span id="userLabel">—</span>
+            <i class="bi bi-box-arrow-right"></i>
+        </div>
+    </div>
+
+    <div class="app-body">
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-4">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:rgba(56,189,248,0.1);color:var(--accent)">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div>
+                        <div class="stat-num" id="statTotal">0</div>
+                        <div class="stat-label">Total clientes</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:rgba(52,211,153,0.1);color:var(--success)">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div>
+                        <div class="stat-num" style="color:var(--success)" id="statActivos">0</div>
+                        <div class="stat-label">Registrados hoy</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:rgba(129,140,248,0.1);color:var(--accent2)">
+                        <i class="bi bi-database"></i>
+                    </div>
+                    <div>
+                        <div class="stat-num" style="color:var(--accent2)" id="statDB">—</div>
+                        <div class="stat-label">Base de datos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+
+            <!-- ── FORMULARIO ── -->
+            <div class="col-lg-4">
+                <div class="panel h-100">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="bi bi-person-plus" style="color:var(--accent)"></i>
+                            Datos del Cliente
+                        </div>
+                        <button class="btn-outline-accent btn" onclick="limpiar()" style="padding:0.3rem 0.8rem;font-size:0.8rem">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </button>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="editing-banner" id="editBanner">
+                            <i class="bi bi-pencil-square"></i> Modo edición activo
+                            <span id="editId" style="font-family:monospace"></span>
+                        </div>
+
+                        <input type="hidden" id="codiClie">
+
+                        <div class="mb-3">
+                            <label class="form-label">DNI</label>
+                            <input type="text" id="ndni" class="form-control" placeholder="12345678" maxlength="8">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Apellido Paterno</label>
+                            <input type="text" id="appa" class="form-control" placeholder="García">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Apellido Materno</label>
+                            <input type="text" id="apma" class="form-control" placeholder="López">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nombre(s)</label>
+                            <input type="text" id="nomb" class="form-control" placeholder="Juan Carlos">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Fecha de Nacimiento</label>
+                            <input type="date" id="fecha" class="form-control">
+                        </div>
+
+                        <button class="btn btn-accent w-100" onclick="guardarCliente()">
+                            <i class="bi bi-floppy me-2"></i>Guardar Cliente
+                        </button>
+                        <button class="btn btn-outline-accent w-100 mt-2" onclick="buscarCliente()">
+                            <i class="bi bi-search me-2"></i>Buscar por DNI
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TABLA ── -->
+            <div class="col-lg-8">
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="bi bi-table" style="color:var(--accent2)"></i>
+                            Lista de Clientes
+                        </div>
+                        <button class="btn-outline-accent btn" onclick="listarClientes()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
+                        </button>
+                    </div>
+                    <div class="panel-body" style="padding:0.75rem">
+                        <div style="overflow-x:auto">
+                            <table class="data-table">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>DNI</th>
+                                    <th>Apellidos y Nombre</th>
+                                    <th>F. Nacimiento</th>
+                                    <th style="text-align:right">Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody id="tablaClientes">
+                                <tr><td colspan="5">
+                                    <div class="empty-state">
+                                        <i class="bi bi-people"></i>
+                                        Cargando clientes...
+                                    </div>
+                                </td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Zone -->
+<div id="toastZone"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+    // ── CONFIG ──
+     const URL_BASE = "http://pruebita.codextpd.com";
+
+    // ── TOAST ──
+    function toast(msg, tipo = "success") {
+        const icons = { success: "✅", danger: "❌", warning: "⚠️", info: "ℹ️" };
+        const el = document.createElement("div");
+        el.className = "toast-item";
+        el.innerHTML = `<span>${icons[tipo] || "ℹ️"}</span><span>${msg}</span>`;
+        document.getElementById("toastZone").appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+    }
+
+    // ── LOGIN ──
+    function login() {
+        const data = {
+            user: document.getElementById("user").value.trim(),
+            pass: document.getElementById("pass").value
+        };
+        if (!data.user || !data.pass) { toast("Completa todos los campos", "warning"); return; }
+
+        fetch(URL_BASE + "/api/usuarios/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(resp => {
+            if (resp.codiUsua) {
+                document.getElementById("userLabel").textContent = resp.logiUsua;
+                document.getElementById("loginDiv").style.display = "none";
+                document.getElementById("app").style.display = "block";
+                document.getElementById("statDB").textContent = "OK";
+                listarClientes();
+                toast("Bienvenido, " + resp.logiUsua);
+            } else {
+                toast(resp.mensaje || "Credenciales incorrectas", "danger");
+            }
+        })
+        .catch(() => toast("No se pudo conectar al servidor", "danger"));
+    }
+
+    // ── CERRAR SESION ──
+    function cerrarSesion() {
+        if (!confirm("¿Cerrar sesión?")) return;
+        document.getElementById("app").style.display = "none";
+        document.getElementById("loginDiv").style.display = "flex";
+        document.getElementById("user").value = "";
+        document.getElementById("pass").value = "";
+    }
+
+    // ── RENDER TABLA ──
+    function renderTabla(data) {
+        document.getElementById("statTotal").textContent = data.length;
+        if (data.length === 0) {
+            document.getElementById("tablaClientes").innerHTML = `
+                <tr><td colspan="5">
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        No hay clientes registrados aún
+                    </div>
+                </td></tr>`;
+            return;
+        }
+        let html = "";
+        data.forEach(c => {
+            html += `
+            <tr>
+                <td><span class="badge-id">#${c.codiClie}</span></td>
+                <td style="font-family:'JetBrains Mono',monospace;font-size:0.85rem">${c.ndniClie ?? ""}</td>
+                <td>${c.appaClie ?? ""} ${c.apmaClie ?? ""}, ${c.nombClie ?? ""}</td>
+                <td style="color:var(--muted);font-size:0.85rem">${c.fechNaciClie ?? "—"}</td>
+                <td style="text-align:right">
+                    <button class="btn-icon btn-edit me-1" onclick="editar(${c.codiClie})" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn-icon btn-del" onclick="eliminar(${c.codiClie})" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            </tr>`;
+        });
+        document.getElementById("tablaClientes").innerHTML = html;
+    }
+
+    // ── LISTAR ──
+    function listarClientes() {
+        fetch(URL_BASE + "/api/clientes")
+            .then(res => res.json())
+            .then(data => {
+                const hoy = new Date().toISOString().split("T")[0];
+                document.getElementById("statActivos").textContent =
+                    data.filter(c => c.fechNaciClie === hoy).length;
+                renderTabla(data);
+            })
+            .catch(() => toast("Error al cargar clientes", "danger"));
+    }
+
+    // ── BUSCAR POR DNI ──
+    function buscarCliente() {
+        const dni = document.getElementById("ndni").value.trim();
+        if (!dni) { toast("Escribe un DNI para buscar", "warning"); return; }
+
+        fetch(`${URL_BASE}/api/clientes`)
+            .then(res => res.json())
+            .then(data => {
+                const encontrados = data.filter(c => c.ndniClie && c.ndniClie.includes(dni));
+                if (encontrados.length === 0) {
+                    toast("No se encontró ningún cliente con ese DNI", "warning"); return;
+                }
+                if (encontrados.length === 1) {
+                    const c = encontrados[0];
+                    document.getElementById("codiClie").value = c.codiClie;
+                    document.getElementById("ndni").value     = c.ndniClie  ?? "";
+                    document.getElementById("appa").value     = c.appaClie  ?? "";
+                    document.getElementById("apma").value     = c.apmaClie  ?? "";
+                    document.getElementById("nomb").value     = c.nombClie  ?? "";
+                    document.getElementById("fecha").value    = c.fechNaciClie ?? "";
+                    const banner = document.getElementById("editBanner");
+                    banner.style.display = "flex";
+                    document.getElementById("editId").textContent = "#" + c.codiClie;
+                    toast("Cliente encontrado y cargado", "info");
+                } else {
+                    renderTabla(encontrados);
+                    toast(`Se encontraron ${encontrados.length} coincidencias`, "info");
+                }
+            })
+            .catch(() => toast("Error al buscar", "danger"));
+    }
+
+    // ── GUARDAR / ACTUALIZAR ──
+    function guardarCliente() {
+        const id = document.getElementById("codiClie").value;
+        const cliente = {
+            ndniClie:     document.getElementById("ndni").value.trim(),
+            appaClie:     document.getElementById("appa").value.trim(),
+            apmaClie:     document.getElementById("apma").value.trim(),
+            nombClie:     document.getElementById("nomb").value.trim(),
+            fechNaciClie: document.getElementById("fecha").value || null
+        };
+
+        if (!cliente.ndniClie || !cliente.nombClie) {
+            toast("DNI y Nombre son obligatorios", "warning"); return;
+        }
+
+        const metodo = id ? "PUT" : "POST";
+        const url    = id ? `${URL_BASE}/api/clientes/${id}` : `${URL_BASE}/api/clientes`;
+
+        fetch(url, {
+            method: metodo,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(cliente)
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.json();
+        })
+        .then(() => {
+            toast(id ? "Cliente actualizado ✔" : "Cliente registrado ✔");
+            limpiar();
+            listarClientes();
+        })
+        .catch(err => toast("Error al guardar: " + err.message, "danger"));
+    }
+
+    // ── EDITAR ──
+    function editar(id) {
+        fetch(`${URL_BASE}/api/clientes/${id}`)
+            .then(res => res.json())
+            .then(c => {
+                document.getElementById("codiClie").value = c.codiClie;
+                document.getElementById("ndni").value     = c.ndniClie  ?? "";
+                document.getElementById("appa").value     = c.appaClie  ?? "";
+                document.getElementById("apma").value     = c.apmaClie  ?? "";
+                document.getElementById("nomb").value     = c.nombClie  ?? "";
+                document.getElementById("fecha").value    = c.fechNaciClie ?? "";
+                const banner = document.getElementById("editBanner");
+                banner.style.display = "flex";
+                document.getElementById("editId").textContent = "#" + id;
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            })
+            .catch(() => toast("Error al cargar cliente", "danger"));
+    }
+
+    // ── ELIMINAR ──
+    function eliminar(id) {
+        if (!confirm("¿Eliminar este cliente? Esta acción no se puede deshacer.")) return;
+        fetch(`${URL_BASE}/api/clientes/${id}`, { method: "DELETE" })
+            .then(() => { toast("Cliente eliminado", "warning"); listarClientes(); })
+            .catch(() => toast("Error al eliminar", "danger"));
+    }
+
+    // ── LIMPIAR ──
+    function limpiar() {
+        ["codiClie","ndni","appa","apma","nomb","fecha"].forEach(id =>
+            document.getElementById(id).value = "");
+        document.getElementById("editBanner").style.display = "none";
+        listarClientes();
+    }
+
+</script>
+</body>
+</html>
